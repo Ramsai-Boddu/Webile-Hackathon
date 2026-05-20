@@ -6,7 +6,7 @@ import adminRoutes from "./routes/adminRoutes";
 import navRoutes from "./routes/navRoutes";
 import auditMiddleware from "./middleware/auditMiddleware";
 import buyRoutes from "./routes/buyRoutes";
-
+import realEstateRoutes from "./routes/realEstateRoutes";
 
 const app = express();
 
@@ -19,6 +19,7 @@ app.use("/portfolio",portfolioRoutes);
 app.use("/bs",buyRoutes)
 app.use("/admin",adminRoutes)
 app.use("/hist",navRoutes)
+app.use("/real-estate",realEstateRoutes)
 
 app.listen(4000, () => {
     console.log("Gateway server running on port 4000");

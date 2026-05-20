@@ -3,9 +3,15 @@ import axios from "axios";
 import pool from "../config/db";
 import redisClient from "../config/redis";
 
-export const getPortfolio = async (req: Request, res: Response): Promise<void> => {
+export const getPortfolio = async (
+    req: Request,
+    res: Response
+): Promise<void> => {
+
     try {
-        const { investorId } = req.params;
+
+        const { investorId } =
+            req.params;
 
         const investorQuery = `
             SELECT *
@@ -13,117 +19,249 @@ export const getPortfolio = async (req: Request, res: Response): Promise<void> =
             WHERE investor_id = $1
         `;
 
-        const investorResult = await pool.query(investorQuery, [investorId]);
+        const investorResult =
+            await pool.query(
+                investorQuery,
+                [investorId]
+            );
 
-        if (investorResult.rows.length === 0) {
+        if (
+            investorResult.rows.length === 0
+        ) {
+
             res.status(404).json({
                 success: false,
-                message: "Investor not found"
+                message:
+                    "Investor not found"
             });
+
             return;
         }
 
-        const investor = investorResult.rows[0];
+        const investor =
+            investorResult.rows[0];
 
-        if (req.user?.role !== "ADMIN" && req.user?.investorId !== investorId) {
+        if (
+            req.user?.role !== "ADMIN"
+            &&
+            req.user?.investorId !== investorId
+        ) {
+
             res.status(403).json({
                 success: false,
-                message: "Unauthorized portfolio access"
+                message:
+                    "Unauthorized portfolio access"
             });
+
             return;
         }
 
-        const cacheKey = `portfolio:${investorId}`;
+        const cacheKey =
+            `portfolio:${investorId}`;
 
-        let cachedPortfolio = null;
+        let cachedPortfolio =
+            null;
 
         if (redisClient.isOpen) {
-            cachedPortfolio = await redisClient.get(cacheKey);
+
+            cachedPortfolio =
+                await redisClient.get(
+                    cacheKey
+                );
         }
 
         if (cachedPortfolio) {
+
             res.status(200).json({
                 success: true,
-                source: "REDIS_CACHE",
-                data: JSON.parse(cachedPortfolio)
+                source:
+                    "REDIS_CACHE",
+                data:
+                    JSON.parse(
+                        cachedPortfolio
+                    )
             });
+
             return;
         }
 
-        const customerRef = investor.customer_ref;
+        const customerRef =
+            investor.customer_ref;
 
-        const equityResponse = await axios.get(
-            `http://localhost:4001/equity/stocks/${investorId}`
-        );
+        const equityResponse =
+            await axios.get(
+                `http://localhost:4001/equity/stocks/${investorId}`
+            );
 
-        const mfResponse = await axios.get(
-            `http://localhost:4002/mf/funds/${customerRef}`
-        );
+        const mfResponse =
+            await axios.get(
+                `http://localhost:4002/mf/funds/${customerRef}`
+            );
 
-        const holdings = equityResponse.data.holdings;
-        const funds = mfResponse.data.funds;
+        const propertyQuery = `
+            SELECT *
+            FROM properties
+            WHERE investor_pan = $1
+        `;
 
-        const totalEquity = holdings.reduce(
-            (total: number, stock: any) => {
-                return total + (
-                    Number(stock.quantity) *
-                    Number(stock.current_market_price)
-                );
-            },
-            0
-        );
+        const propertyResult =
+            await pool.query(
+                propertyQuery,
+                [investor.pan_number]
+            );
 
-        const totalMutualFunds = funds.reduce(
-            (total: number, fund: any) => {
-                return total + Number(fund.current_value);
-            },
-            0
-        );
+        const holdings =
+            equityResponse.data.holdings;
 
-        const totalNetworth = totalEquity + totalMutualFunds;
+        const funds =
+            mfResponse.data.funds;
+
+        const properties =
+            propertyResult.rows;
+
+        const totalEquity =
+            holdings.reduce(
+                (
+                    total: number,
+                    stock: any
+                ) => {
+
+                    return (
+                        total +
+                        (
+                            Number(stock.quantity)
+                            *
+                            Number(
+                                stock.current_market_price
+                            )
+                        )
+                    );
+                },
+
+                0
+            );
+
+        const totalMutualFunds =
+            funds.reduce(
+                (
+                    total: number,
+                    fund: any
+                ) => {
+
+                    return (
+                        total +
+                        Number(
+                            fund.current_value
+                        )
+                    );
+                },
+
+                0
+            );
+
+        const totalRealEstate =
+            properties.reduce(
+                (
+                    total: number,
+                    property: any
+                ) => {
+
+                    return (
+                        total +
+                        Number(
+                            property.market_value
+                        )
+                    );
+                },
+
+                0
+            );
+
+        const totalNetworth =
+            totalEquity +
+            totalMutualFunds +
+            totalRealEstate;
 
         const portfolioResponse = {
+
             investor: {
-                investorId: investor.investor_id,
-                customerRef: investor.customer_ref,
-                fullName: investor.full_name,
-                pan: investor.pan_number
+
+                investorId:
+                    investor.investor_id,
+
+                customerRef:
+                    investor.customer_ref,
+
+                fullName:
+                    investor.full_name,
+
+                pan:
+                    investor.pan_number
             },
+
             equity: {
-                totalValue: totalEquity,
+
+                totalValue:
+                    totalEquity,
+
                 holdings
             },
+
             mutualFunds: {
-                totalValue: totalMutualFunds,
+
+                totalValue:
+                    totalMutualFunds,
+
                 funds
             },
+
+            realEstate: {
+
+                totalValue:
+                    totalRealEstate,
+
+                properties
+            },
+
             summary: {
+
                 totalEquity,
+
                 totalMutualFunds,
+
+                totalRealEstate,
+
                 totalNetworth
             }
         };
 
         if (redisClient.isOpen) {
+
             await redisClient.set(
                 cacheKey,
-                JSON.stringify(portfolioResponse),
+                JSON.stringify(
+                    portfolioResponse
+                ),
                 { EX: 60 }
             );
         }
 
         res.status(200).json({
             success: true,
-            source: "DATABASE",
-            data: portfolioResponse
+            source:
+                "DATABASE",
+            data:
+                portfolioResponse
         });
 
     } catch (error) {
+
         console.log(error);
 
         res.status(500).json({
             success: false,
-            message: "Failed to aggregate portfolio"
+            message:
+                "Failed to aggregate portfolio"
         });
     }
 };
