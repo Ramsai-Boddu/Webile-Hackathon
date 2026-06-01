@@ -16,4 +16,21 @@ const generateToken = (
     );
 };
 
+export const generateRefreshToken = (
+    investorId: string,
+    role: string
+): string => {
+
+    return jwt.sign(
+        {
+            investorId,
+            role
+        },
+        process.env.SECRET_REFRESH as string,
+        {
+            expiresIn: "7d"
+        }
+    );
+};
+
 export default generateToken;

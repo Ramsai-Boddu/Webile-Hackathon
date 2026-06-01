@@ -212,13 +212,8 @@ export const investFund = async (req: Request, res: Response): Promise<void> => 
     }
 };
 
-export const createSip = async (
-    req: Request,
-    res: Response
-): Promise<void> => {
-
+export const createSip = async (req: Request,res: Response): Promise<void> => {
     try {
-
         const {
             customerRef,
             schemeCode,
@@ -631,22 +626,14 @@ ORDER BY mnh.nav_date DESC
     }
 };
 
-export const getMfTransactions = async (
-    req: Request,
-    res: Response
-): Promise<void> => {
-
+export const getMfTransactions = async (req: Request,res: Response): Promise<void> => {
     try {
-
-        const { investorId } =
-            req.params;
-
+        const { investorId } =req.params;
         const investorQuery = `
             SELECT *
             FROM unified_investors
             WHERE investor_id = $1
         `;
-
         const investorResult =
             await pool.query(
                 investorQuery,
@@ -666,12 +653,8 @@ export const getMfTransactions = async (
             return;
         }
 
-        const investor =
-            investorResult.rows[0];
-
-        const customerRef =
-            investor.customer_ref;
-
+        const investor =investorResult.rows[0];
+        const customerRef = investor.customer_ref;
         const transactionQuery = `
             SELECT
                 mt.id,
@@ -732,32 +715,21 @@ export const getMfTransactions = async (
     }
 };
 
-export const getAllMfTransactions = async (
-    req: Request,
-    res: Response
-): Promise<void> => {
-
+export const getAllMfTransactions = async (req: Request,res: Response): Promise<void> => {
     try {
-
         const transactionQuery = `
             SELECT
                 mt.id,
                 ui.investor_id,
-
                 ui.full_name,
-
                 mt.customer_ref,
-
                 mt.scheme_code,
-
                 ms.scheme_name,
-
                 mt.transaction_type,
                 mt.amount,
                 mt.units,
                 mt.nav_value,
                 mt.created_at
-
             FROM mf_transactions mt
 
             JOIN mf_schemes ms
@@ -768,30 +740,20 @@ export const getAllMfTransactions = async (
 
             ORDER BY mt.created_at DESC
         `;
-
         const transactionResult =
             await pool.query(
                 transactionQuery
             );
-
         res.status(200).json({
             success: true,
-
-            totalTransactions:
-                transactionResult.rows.length,
-
-            transactions:
-                transactionResult.rows
+            totalTransactions:transactionResult.rows.length,
+            transactions:transactionResult.rows
         });
-
     } catch (error) {
-
         console.log(error);
-
         res.status(500).json({
             success: false,
-            message:
-                "Failed to fetch MF transactions"
+            message:"Failed to fetch MF transactions"
         });
     }
 };

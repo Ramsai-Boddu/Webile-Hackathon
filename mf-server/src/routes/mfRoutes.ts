@@ -1,6 +1,5 @@
 import express from "express";
 import {createSip, getAllFunds, getAllMfTransactions, getFundByScheme, getFunds,getMfTransactions,getNavHistory,getSipHistory, getSipsById, investFund, stopSip} from "../controllers/mfController";
-
 const router = express.Router();
 
 router.get("/funds/:customerRef",getFunds);

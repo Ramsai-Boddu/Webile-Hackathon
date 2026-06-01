@@ -1,25 +1,37 @@
 import { Request, Response } from "express";
-
-import bcrypt from "bcrypt";
-
 import pool from "../config/db";
+import redisClient from "../config/redis";
 
-import generateToken from "../utils/generateToken";
+import generateToken, {
+    generateRefreshToken
+} from "../utils/generateToken";
 
-export const login = async (req: Request,res: Response): Promise<void> => {
+export const login = async (
+    req: Request,
+    res: Response
+): Promise<void> => {
+
     try {
-        const { email, password } = req.body;
+
+        const {
+            email,
+            password
+        } = req.body;
+
         const userQuery = `
             SELECT *
             FROM equity_users
             WHERE email = $1
         `;
+
         const userResult = await pool.query(
             userQuery,
             [email]
         );
 
-        if (userResult.rows.length === 0) {
+        if (
+            userResult.rows.length === 0
+        ) {
 
             res.status(404).json({
                 success: false,
@@ -28,8 +40,14 @@ export const login = async (req: Request,res: Response): Promise<void> => {
 
             return;
         }
-        const user = userResult.rows[0];
-        const isPasswordValid = password === user.password_hash;
+
+        const user =
+            userResult.rows[0];
+
+        const isPasswordValid =
+            password ===
+            user.password_hash;
+
         if (!isPasswordValid) {
 
             res.status(401).json({
@@ -39,6 +57,7 @@ export const login = async (req: Request,res: Response): Promise<void> => {
 
             return;
         }
+
         const roleQuery = `
             SELECT r.role_name
 
@@ -49,33 +68,67 @@ export const login = async (req: Request,res: Response): Promise<void> => {
 
             WHERE ur.investor_pan = $1
         `;
+
         const roleResult = await pool.query(
             roleQuery,
             [user.pan_number]
         );
+
         const role =
-            roleResult.rows[0]?.role_name || "INVESTOR";
+            roleResult.rows[0]?.role_name
+            || "INVESTOR";
 
         const token = generateToken(
             user.investor_id,
             role
         );
+
+        const refreshToken =
+            generateRefreshToken(
+                user.investor_id,
+                role
+            );
+
+        // Store refresh token in Redis
+        await redisClient.set(
+            `refresh:${user.investor_id}`,
+            refreshToken,
+            {
+                EX: 7 * 24 * 60 * 60
+            }
+        );
+
+        console.log(
+            "Refresh token stored in Redis"
+        );
+
         res.status(200).json({
             success: true,
             token,
+            refreshToken,
+
             user: {
-                investorId: user.investor_id,
-                fullName: user.full_name,
-                email: user.email,
+                investorId:
+                    user.investor_id,
+
+                fullName:
+                    user.full_name,
+
+                email:
+                    user.email,
+
                 role
             }
         });
 
     } catch (error) {
+
         console.log(error);
+
         res.status(500).json({
             success: false,
             message: "Login failed"
         });
+
     }
 };

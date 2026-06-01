@@ -7,12 +7,14 @@ import navRoutes from "./routes/navRoutes";
 import auditMiddleware from "./middleware/auditMiddleware";
 import buyRoutes from "./routes/buyRoutes";
 import realEstateRoutes from "./routes/realEstateRoutes";
+import rateLimiter from "./middleware/rateLimiter";
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
 app.use(auditMiddleware("GATEWAY_SERVICE"));
+app.use(rateLimiter)
 
 app.use("/auth", authRoutes);
 app.use("/portfolio",portfolioRoutes);

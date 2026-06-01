@@ -14,6 +14,7 @@ const pool = new Pool({
         rejectUnauthorized: false
     }
 });
+
 const run = async (): Promise<void> => {
     try {
         await pool.connect();

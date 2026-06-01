@@ -328,16 +328,9 @@ export const getInvestorDetails = async (req: Request,res: Response): Promise<vo
     }
 };
 
-export const getAllTransactions = async (
-    req: Request,
-    res: Response
-): Promise<void> => {
-
+export const getAllTransactions = async (req: Request,res: Response): Promise<void> => {
     try {
-
-        const { investorId } =
-            req.params;
-
+        const { investorId } = req.params;
         const investorResult =
             await pool.query(
                 `
@@ -367,13 +360,11 @@ export const getAllTransactions = async (
         const customerRef =
             investor.customer_ref;
 
-        const stockResponse =
-            await axios.get(
+        const stockResponse = await axios.get(
                 `http://localhost:4001/equity/transactions/${investorId}`
             );
 
-        const mfResponse =
-            await axios.get(
+        const mfResponse = await axios.get(
                 `http://localhost:4002/mf/transactions/${customerRef}`
             );
 

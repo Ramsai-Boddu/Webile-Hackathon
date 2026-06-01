@@ -13,7 +13,6 @@ const auditMiddleware = (serviceName: string) => {
                             "user-agent"
                             ]
                         );
-                    const uaResult = parser.getResult();
                     const ipAddress =(
                             req.headers[
                             "x-forwarded-for"

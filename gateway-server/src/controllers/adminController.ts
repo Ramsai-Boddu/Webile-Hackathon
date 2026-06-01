@@ -1,6 +1,7 @@
 import axios from "axios";
 import pool from "../config/db";
 import { Request, Response } from "express";
+import redisClient from "../config/redis";
 
 export const getAllInvestors = async (req: Request,res: Response): Promise<void> => {
     try {
@@ -122,8 +123,7 @@ export const getAllLogs = async (
 
         const logsQuery = `
             SELECT
-                id,
-                investor_pan,
+                audit_id,
                 service_name,
                 action,
                 endpoint,
@@ -140,9 +140,7 @@ export const getAllLogs = async (
         `;
 
         const logsResult =
-            await pool.query(
-                logsQuery
-            );
+            await pool.query(logsQuery);
 
         res.status(200).json({
             success: true,
@@ -166,18 +164,9 @@ export const getAllLogs = async (
     }
 };
 
-export const updateStockPrice = async (
-    req: Request,
-    res: Response
-): Promise<void> => {
-
+export const updateStockPrice = async (req: Request,res: Response): Promise<void> => {
     try {
-
-        const {
-            stockSymbol,
-            price
-        } = req.body;
-
+        const {stockSymbol,price} = req.body;
         const stockResult =
             await pool.query(
                 `
@@ -626,13 +615,8 @@ export const getAllPortfolioTransactions = async (
     }
 };
 
-export const createStock = async (
-    req: Request,
-    res: Response
-): Promise<void> => {
-
+export const createStock = async (req: Request,res: Response): Promise<void> => {
     try {
-
         const {
             stockSymbol,
             companyName,
@@ -640,7 +624,6 @@ export const createStock = async (
             sector,
             price
         } = req.body;
-
         const existingStock =
             await pool.query(
                 `
@@ -651,10 +634,7 @@ export const createStock = async (
                 [stockSymbol]
             );
 
-        if (
-            existingStock.rows.length > 0
-        ) {
-
+        if (existingStock.rows.length > 0) {
             res.status(400).json({
                 success: false,
                 message:
