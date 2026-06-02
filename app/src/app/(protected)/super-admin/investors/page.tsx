@@ -47,17 +47,26 @@ export default function InvestorsPage() {
 
         try {
 
-          // TOKEN FROM LOCALSTORAGE
           const token =
-            localStorage.getItem(
-              "token"
-            );
+            document.cookie
+              .split("; ")
+              .find((row) =>
+                row.startsWith(
+                  "token="
+                )
+              )
+              ?.split("=")[1];
 
           const response =
             await fetch(
               "http://localhost:4000/admin/investors",
               {
                 method: "GET",
+
+                mode: "cors",
+
+                credentials:
+                  "include",
 
                 headers: {
                   Authorization:
@@ -111,17 +120,26 @@ export default function InvestorsPage() {
 
       try {
 
-        // TOKEN FROM LOCALSTORAGE
         const token =
-          localStorage.getItem(
-            "token"
-          );
+          document.cookie
+            .split("; ")
+            .find((row) =>
+              row.startsWith(
+                "token="
+              )
+            )
+            ?.split("=")[1];
 
         const response =
           await fetch(
             `http://localhost:4000/admin/investor/${investorId}/deactivate`,
             {
               method: "PATCH",
+
+              mode: "cors",
+
+              credentials:
+                "include",
 
               headers: {
                 Authorization:

@@ -1,19 +1,21 @@
-import SuperAdminSidebar from "@/components/layout/SuperAdminSidebar";
-import Navbar from "@/components/layout/Navbar";
+import Navbar from "@/src/components/layout/Navbar";
+import SuperAdminSidebar from "@/src/components/layout/SuperAdminSidebar";
+
 
 export default function SuperAdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  return (
-    <div className="bg-[#07111f] min-h-screen">
 
-      {/* FIXED SIDEBAR */}
+  return (
+    <div className="flex bg-[#07111f]">
+
+      {/* SIDEBAR */}
       <SuperAdminSidebar />
 
-      {/* MAIN CONTENT */}
-      <div className="ml-72 min-h-screen">
+      {/* MAIN */}
+      <div className="flex-1 min-h-screen">
 
         <Navbar />
 

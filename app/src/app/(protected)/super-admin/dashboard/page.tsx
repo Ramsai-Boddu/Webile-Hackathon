@@ -36,12 +36,15 @@ export default function SuperAdminDashboard() {
       async () => {
 
         try {
-
-          // TOKEN FROM LOCALSTORAGE
           const token =
-            localStorage.getItem(
-              "token"
-            );
+            document.cookie
+              .split("; ")
+              .find((row) =>
+                row.startsWith(
+                  "token="
+                )
+              )
+              ?.split("=")[1];
 
           // FETCH INVESTORS
           const investorsResponse =
@@ -133,7 +136,6 @@ export default function SuperAdminDashboard() {
   }, []);
 
   return (
-
     <div className="text-white">
 
       {/* HEADER */}

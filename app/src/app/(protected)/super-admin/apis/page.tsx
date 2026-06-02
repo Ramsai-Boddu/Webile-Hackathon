@@ -5,54 +5,20 @@ import {
   useState,
 } from "react";
 
-export default function SipMonitoringPage() {
+export default function ApiMonitoringPage() {
 
-  const [sips, setSips] =
+  const [apis, setApis] =
     useState<any[]>([]);
 
   const [loading, setLoading] =
     useState(true);
 
-  const [error, setError] =
-    useState("");
-
   useEffect(() => {
 
-    const fetchSips =
+    const fetchApis =
       async () => {
 
         try {
-
-          // GET USER COOKIE
-          const userCookie =
-            document.cookie
-              .split("; ")
-              .find((row) =>
-                row.startsWith(
-                  "user="
-                )
-              );
-
-          if (!userCookie) {
-
-            setError(
-              "User cookie missing"
-            );
-
-            return;
-          }
-
-          const user =
-            JSON.parse(
-              decodeURIComponent(
-                userCookie.split(
-                  "="
-                )[1]
-              )
-            );
-
-          const customerRef =
-            user.customerRef;
 
           // TOKEN
           const token =
@@ -65,9 +31,10 @@ export default function SipMonitoringPage() {
               )
               ?.split("=")[1];
 
+          // USING AUDIT LOGS API
           const response =
             await fetch(
-              `http://localhost:4000/investments/sips/${customerRef}`,
+              "http://localhost:4000/admin/logs",
               {
                 method: "GET",
 
@@ -84,26 +51,16 @@ export default function SipMonitoringPage() {
           console.log(data);
 
           if (!response.ok) {
-
-            setError(
-              data.message ||
-                "Failed to fetch SIPs"
-            );
-
             return;
           }
 
-          setSips(
-            data.sips || []
+          setApis(
+            data.logs || []
           );
 
         } catch (error) {
 
           console.log(error);
-
-          setError(
-            "Backend connection failed"
-          );
 
         } finally {
 
@@ -111,7 +68,7 @@ export default function SipMonitoringPage() {
         }
       };
 
-    fetchSips();
+    fetchApis();
 
   }, []);
 
@@ -123,11 +80,11 @@ export default function SipMonitoringPage() {
       <div className="mb-10">
 
         <h1 className="text-5xl font-bold">
-          SIP Monitoring
+          API Monitoring
         </h1>
 
         <p className="text-slate-400 mt-3">
-          Monitor all SIP investments
+          Realtime API activity tracking
         </p>
 
       </div>
@@ -136,26 +93,15 @@ export default function SipMonitoringPage() {
       {loading && (
 
         <div className="text-cyan-400">
-          Loading SIPs...
+          Loading APIs...
         </div>
 
       )}
 
-      {/* ERROR */}
-      {error && (
-
-        <div className="bg-red-500/10 border border-red-500/20 text-red-400 p-4 rounded-2xl">
-
-          {error}
-
-        </div>
-
-      )}
-
-      {/* SIPS */}
+      {/* API LIST */}
       <div className="space-y-5">
 
-        {sips.map((sip, index) => (
+        {apis.map((api, index) => (
 
           <div
             key={index}
@@ -169,23 +115,23 @@ export default function SipMonitoringPage() {
 
                 <h2 className="text-2xl font-semibold text-cyan-400">
 
-                  {sip.scheme_code}
+                  {api.endpoint}
 
                 </h2>
 
                 <p className="text-slate-400 mt-2">
 
-                  SIP Amount:
+                  Service:
                   {" "}
-                  ₹{sip.sip_amount}
+                  {api.service_name}
 
                 </p>
 
                 <p className="text-slate-400 mt-2">
 
-                  Frequency:
+                  Method:
                   {" "}
-                  {sip.frequency}
+                  {api.request_method}
 
                 </p>
 
@@ -196,33 +142,40 @@ export default function SipMonitoringPage() {
 
                 <p className="text-slate-400 text-sm">
 
-                  Next SIP Date
+                  Response Time
 
                 </p>
 
-                <h3 className="text-2xl font-bold text-cyan-400 mt-2">
+                <h3 className="text-3xl font-bold text-cyan-400 mt-2">
 
-                  {new Date(
-                    sip.next_sip_date
-                  ).toLocaleDateString()}
+                  {api.response_time_ms}
+                  ms
 
                 </h3>
 
               </div>
 
               {/* RIGHT */}
-              <div>
+              <div className="flex flex-col gap-3">
 
                 <span
-                  className={`px-5 py-2 rounded-xl text-sm font-semibold
+                  className={`px-5 py-2 rounded-xl text-sm font-semibold text-center
                   ${
-                    sip.status === "ACTIVE"
+                    api.success
                       ? "bg-green-500/10 text-green-400"
                       : "bg-red-500/10 text-red-400"
                   }`}
                 >
 
-                  {sip.status}
+                  {api.success
+                    ? "Healthy"
+                    : "Failed"}
+
+                </span>
+
+                <span className="bg-white/5 px-5 py-2 rounded-xl text-sm text-slate-300 text-center">
+
+                  {api.status_code}
 
                 </span>
 

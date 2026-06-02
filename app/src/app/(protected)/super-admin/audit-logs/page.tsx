@@ -41,7 +41,7 @@ export default function AuditLogsPage() {
 
   }, []);
 
-  // GET AUDIT LOGS
+ 
   const getAuditLogs =
     async () => {
 
@@ -51,7 +51,7 @@ export default function AuditLogsPage() {
 
         setError("");
 
-        // TOKEN
+       
         const token =
           localStorage.getItem(
             "token"
@@ -66,7 +66,7 @@ export default function AuditLogsPage() {
           return;
         }
 
-        // API CALL
+     
         const response =
           await fetch(
             "http://localhost:4000/admin/logs",
@@ -83,7 +83,7 @@ export default function AuditLogsPage() {
             }
           );
 
-        // JSON RESPONSE
+        
         const data =
           await response.json();
 
@@ -92,7 +92,7 @@ export default function AuditLogsPage() {
           data
         );
 
-        // ERROR HANDLING
+       
         if (
           !response.ok ||
           data.success === false
@@ -107,8 +107,6 @@ export default function AuditLogsPage() {
 
           return;
         }
-
-        // HANDLE MULTIPLE RESPONSE TYPES
         let logsArray: AuditLog[] = [];
 
         if (
@@ -163,7 +161,7 @@ export default function AuditLogsPage() {
 
     <div className="p-6 min-h-screen bg-[#07111f] text-white">
 
-      {/* HEADER */}
+   
       <div className="mb-10">
 
         <h1 className="text-5xl font-bold">
@@ -179,8 +177,6 @@ export default function AuditLogsPage() {
         </p>
 
       </div>
-
-      {/* LOADING */}
       {
         loading && (
 
@@ -192,8 +188,6 @@ export default function AuditLogsPage() {
 
         )
       }
-
-      {/* ERROR */}
       {
         error && (
 
@@ -205,8 +199,6 @@ export default function AuditLogsPage() {
 
         )
       }
-
-      {/* EMPTY */}
       {
         !loading &&
         logs.length === 0 &&
@@ -220,8 +212,6 @@ export default function AuditLogsPage() {
 
         )
       }
-
-      {/* LOGS */}
       <div className="space-y-5">
 
         {logs.map((log, index) => (
@@ -233,7 +223,6 @@ export default function AuditLogsPage() {
 
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
 
-              {/* LEFT */}
               <div>
 
                 <h2 className="text-2xl font-bold text-cyan-400">
@@ -267,8 +256,6 @@ export default function AuditLogsPage() {
                 </p>
 
               </div>
-
-              {/* CENTER */}
               <div>
 
                 <p className="text-slate-400 text-sm">
@@ -284,8 +271,6 @@ export default function AuditLogsPage() {
                 </h3>
 
               </div>
-
-              {/* RIGHT */}
               <div>
 
                 <span

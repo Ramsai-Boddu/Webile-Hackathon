@@ -4,12 +4,12 @@ import {
   useState,
 } from "react";
 
-export default function UpdateNavPage() {
+export default function UpdateStockPage() {
 
-  const [schemeCode, setSchemeCode] =
+  const [stockSymbol, setStockSymbol] =
     useState("");
 
-  const [navValue, setNavValue] =
+  const [price, setPrice] =
     useState("");
 
   const [loading, setLoading] =
@@ -44,7 +44,7 @@ export default function UpdateNavPage() {
 
         const response =
           await fetch(
-            "http://localhost:4000/admin/market/funds/update-nav",
+            "http://localhost:4000/admin/market/stocks/update-price",
             {
               method: "POST",
 
@@ -62,9 +62,9 @@ export default function UpdateNavPage() {
               },
 
               body: JSON.stringify({
-                schemeCode,
-                navValue:
-                  Number(navValue),
+                stockSymbol,
+                price:
+                  Number(price),
               }),
             }
           );
@@ -78,20 +78,20 @@ export default function UpdateNavPage() {
 
           setMessage(
             data.message ||
-              "Failed to update NAV"
+              "Failed to update stock price"
           );
 
           return;
         }
 
         setMessage(
-          "NAV updated successfully"
+          "Stock price updated successfully"
         );
 
         // RESET
-        setSchemeCode("");
+        setStockSymbol("");
 
-        setNavValue("");
+        setPrice("");
 
       } catch (error) {
 
@@ -115,11 +115,11 @@ export default function UpdateNavPage() {
       <div className="mb-8">
 
         <h1 className="text-4xl font-bold">
-          Update NAV Value
+          Update Stock Price
         </h1>
 
         <p className="text-slate-400 mt-2">
-          Update mutual fund NAV values
+          Update stock market prices
         </p>
 
       </div>
@@ -130,21 +130,21 @@ export default function UpdateNavPage() {
         className="max-w-2xl space-y-6"
       >
 
-        {/* SCHEME CODE */}
+        {/* STOCK SYMBOL */}
         <div>
 
           <label className="block text-sm text-slate-400 mb-2">
 
-            Scheme Code
+            Stock Symbol
 
           </label>
 
           <input
             type="text"
-            placeholder="AXIS001"
-            value={schemeCode}
+            placeholder="RELIANCE"
+            value={stockSymbol}
             onChange={(e) =>
-              setSchemeCode(
+              setStockSymbol(
                 e.target.value
               )
             }
@@ -154,21 +154,21 @@ export default function UpdateNavPage() {
 
         </div>
 
-        {/* NAV VALUE */}
+        {/* PRICE */}
         <div>
 
           <label className="block text-sm text-slate-400 mb-2">
 
-            NAV Value
+            Current Market Price
 
           </label>
 
           <input
             type="number"
-            placeholder="125"
-            value={navValue}
+            placeholder="2850"
+            value={price}
             onChange={(e) =>
-              setNavValue(
+              setPrice(
                 e.target.value
               )
             }
@@ -187,7 +187,7 @@ export default function UpdateNavPage() {
 
           {loading
             ? "Updating..."
-            : "Update NAV"}
+            : "Update Stock"}
 
         </button>
 
